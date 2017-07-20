@@ -1,0 +1,5 @@
+Start controller
+Start interface
+Start historian
+
+Connect via IP address that interface is serving on - port 8080

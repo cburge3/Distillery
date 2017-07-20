@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <title>Chippedhammer</title>
+      <link href="style.css" rel="stylesheet" type="text/css">
+  </head>
+  <body>
+        <label id="temp" style="font-size:120px">Nothing Doing</label>
+        <label style="font-size:120px">&#176F</label>
+    <br>
+    <div id="chartContainer" style="height: 300px; width: 100%;">
+	</div>
+    <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+        <script type="text/javascript" src="/assets/canvasjs"></script>
+    <script type="text/javascript">
+    var value;
+    var xVal = 0;
+    var updateInterval = 3000;
+      $(document).ready(function() {
+        window.setInterval(function(){
+          $.get("/generator")
+           .done(function(string) {
+            $("#temp").text(string);
+            value = parseFloat(string);
+          });
+        }, updateInterval);
+      });
+	window.onload = function () {
+      var dps = [{}];   //dataPoints.
+      var chart = new CanvasJS.Chart("chartContainer",{
+      	title :{
+      		text: "Distillation Temp"
+      	},
+      	axisX: {
+      		title: "Time"
+      	},
+      	axisY: {
+      		title: "Temp\xB0F"
+      	},
+      	data: [{
+      		type: "line",
+      		dataPoints : dps
+      	}]
+      });
+      var updateChart = function () {
+        //var time = new Date();
+        //xVal = time.getTime();
+      	dps.push({x: xVal,y: value});
+      	xVal = xVal + (updateInterval / 1000);
+      	chart.render();
+	// update chart after specified time.
+};
+
+setInterval(function(){updateChart()}, updateInterval);
+}
+</script>
+  </body>
+</html>
