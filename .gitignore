@@ -1,3 +1,5 @@
+templates/assets
+*.xml
 # Windows image file caches
 Thumbs.db
 ehthumbs.db

@@ -5,7 +5,9 @@
       <link href="style.css" rel="stylesheet" type="text/css">
   </head>
   <body>
-        <label id="temp" style="font-size:120px">Nothing Doing</label>
+        <label id="var1" style="font-size:120px">Nothing Doing</label>
+        <label style="font-size:120px">&#176F</label><br>
+        <label id="var2" style="font-size:120px">Nothing Doing</label>
         <label style="font-size:120px">&#176F</label>
     <br>
     <div id="chartContainer" style="height: 300px; width: 100%;">
@@ -17,16 +19,21 @@
     <script type="text/javascript">
     var value;
     var xVal = 0;
-    var updateInterval = 3000;
+    var updateInterval = 10000;
       $(document).ready(function() {
         window.setInterval(function(){
-          $.get("/generator")
-           .done(function(string) {
-            $("#temp").text(string);
-            value = parseFloat(string);
+          $.get("/generator").done(function(result) {
+           var values = JSON.parse(result);
+            jQuery.each(values, function(i, val) {
+            document.getElementById(i).innerHTML = val;
+            });
+            //value = parseFloat(string);
           });
         }, updateInterval);
       });
+
+
+
 	window.onload = function () {
       var dps = [{}];   //dataPoints.
       var chart = new CanvasJS.Chart("chartContainer",{
@@ -55,23 +62,6 @@
 
 setInterval(function(){updateChart()}, updateInterval);
 
-$("button").click(function(e) {
-    e.preventDefault();
-    $.ajax({
-        type: "POST",
-        url: "/generator",
-        data: {
-            id: $(this).attr("id"), // < note use of 'this' here
-            time: "right now"
-        },
-        <!--success: function(result) {-->
-            <!--alert('ok');-->
-        <!--},-->
-        error: function(result) {
-            alert('error');
-        }
-    });
-});
 }
 </script>
   </body>

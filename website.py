@@ -1,9 +1,25 @@
 import os, os.path
 import sys
-from opcua import Client
 import cherrypy
 from cherrypy.process.plugins import Autoreloader
-import random
+from random import randint
+import paho.mqtt.client as mqtt
+
+last_message = '0'
+
+# The callback for when the client receives a CONNACK response from the server.
+def on_connect(client, userdata, flags, rc):
+    print("Connected with result code "+str(rc))
+    # Subscribing in on_connect() means that if we lose the connection and
+    # reconnect then subscriptions will be renewed.
+    client.subscribe("test")
+
+# The callback for when a PUBLISH message is received from the server.
+def on_message(client, userdata, msg):
+    global last_message
+    last_message = msg.payload.decode()
+    print(msg.topic+" "+msg.payload.decode())
+
 sys.path.insert(0, "..")
 
 conf = {
@@ -22,16 +38,16 @@ conf = {
     },
     '/favicon.ico': {
             "tools.staticfile.on": True,
-            "tools.staticfile.filename": "C:\\Users\\cburge\\PycharmProjects\\Distillery\\templates\\golden.ico"
+            "tools.staticfile.filename": "/root/Distillery/templates/golden.ico"
     },
     '/style.css': {
             "tools.staticfile.on": True,
-            "tools.staticfile.filename": "C:\\Users\\cburge\\PycharmProjects\\Distillery\\templates\\style.css"
+            "tools.staticfile.filename": "/root/Distillery/templates/style.css"
     },
     '/assets/canvasjs': {
         "tools.staticfile.on": True,
         "tools.staticfile.filename":
-            "C:\\Users\\cburge\\PycharmProjects\\Distillery\\templates\\assets\\canvasjs-1.9.8\\canvasjs.min.js"
+            "/root/Distillery/templates/assets/canvasjs-1.9.8/canvasjs.min.js"
     }
 
 }
@@ -40,20 +56,17 @@ conf = {
 class ThePlant(object):
     @cherrypy.expose
     def index(self):
-        return open('templates\\index.html')
-
-
+        return open('/root/Distillery/templates/index.html')
 
 @cherrypy.expose
 class OPCInterface(object):
 
     @cherrypy.tools.accept(media='text/plain')
     def GET(self):
-        opc_addr = ["0:Objects", "2:Temperature_Sensor", "2:analog_input"]
-        try:
-            return str(root.get_child(opc_addr).get_data_value().Value.Value)
-        except:
-            return 'Unknown server error'
+        global last_message
+        # input MQTT code here
+        return last_message
+        # return str(randint(1,10))
         # if PV is not None:
         #     cv = PV.get_data_value().Value.Value
         #     print("myvar is: ", cv)
@@ -62,11 +75,8 @@ class OPCInterface(object):
         #     return 'Unknown server error'
 
     def POST(self, **data):
-        opc_addr = ["0:Objects", "2:Heater", "2:discrete_output"]
-        var = root.get_child(opc_addr)
-        current_value = var.get_data_value().Value.Value
-        root.get_child(opc_addr).set_value(not current_value, var.get_data_type_as_variant_type())
-        print(var.get_data_value().Value.Value)
+        # output MQTT code here
+        print("sent a value to controller")
         return "hello"
 
     def PUT(self, another_string):
@@ -79,18 +89,15 @@ class OPCInterface(object):
 
 
 if __name__ == '__main__':
-    client = Client("opc.tcp://localhost:4840/freeopcua/server/")
     webapp = ThePlant()
+    client = mqtt.Client()
+    client.username_pw_set('ionodes', '1jg?8jJ+Ut8,')
+    client.on_connect = on_connect
+    client.on_message = on_message
+    client.connect("localhost", 1883, 60)
+    client.loop_start()
     webapp.generator = OPCInterface()
-    try:
-        client.connect()
-        root = client.get_root_node()
-        objects = client.get_objects_node()
-        # PV = root.get_child(["0:Objects", "2:MyObject", "2:MyVariable"])
-    except ConnectionRefusedError:
-        print('OPC server appears to be down')
     cherrypy.engine.autoreload.unsubscribe()
     cherrypy.server.socket_host = '0.0.0.0'
     cherrypy.quickstart(webapp, '/', conf)
-    # finally:
-    #     client.disconnect()
+

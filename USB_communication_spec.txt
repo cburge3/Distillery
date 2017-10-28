@@ -1,0 +1,7 @@
+IO Board Command specification
+Bit: Usage
+0: Discrete = 0 or analog = 1 command
+1: Command bit for discrete. # for analog
+2-7: Address bits
+If analog the next byte will be the command
+If discrete the next byte is assumed to be another command
