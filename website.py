@@ -5,6 +5,15 @@ from cherrypy.process.plugins import Autoreloader
 from random import randint
 import paho.mqtt.client as mqtt
 
+fd = ''
+
+if os.name == 'nt':
+    fd = '\\'
+else:
+    fd = '/'
+
+cwd = os.path.abspath(os.getcwd()) + fd
+
 last_message = '0'
 
 # The callback for when the client receives a CONNACK response from the server.
