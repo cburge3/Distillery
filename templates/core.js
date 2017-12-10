@@ -13,8 +13,6 @@
         }, updateInterval);
       });
 
-
-
 	window.onload = function () {
       var dps = [{}];   //dataPoints.
       var chart = new CanvasJS.Chart("chartContainer",{
