@@ -4,7 +4,7 @@ import cherrypy
 import argparse
 import json
 from random import randint
-import paho.mqtt.client as mqtt
+import paho.mqtt.client as mqttClient
 
 if os.name == 'nt':
     fd = '\\'
@@ -19,6 +19,7 @@ args = parser.parse_args()
 # cwd = os.path.abspath(os.getcwd()) + fd
 cwd = os.path.dirname(os.path.realpath(__file__)) + fd
 last_message = '0'
+live_data = {}
 
 sys.path.insert(0, "..")
 
@@ -29,11 +30,15 @@ def on_connect(client, userdata, flags, rc):
     # reconnect then subscriptions will be renewed.
     client.subscribe("test")
 
+
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
-    global last_message
-    last_message = msg.payload.decode()
+    # global last_message, live_data
+    # last_message = msg.payload.decode()
+    global live_data
+    live_data[msg.topic] = msg.payload.decode()
     print(msg.topic+" "+msg.payload.decode())
+
 
 conf = {
     '/': {
@@ -69,12 +74,27 @@ class ThePlant(object):
 @cherrypy.expose
 class AJAXInterface(object):
 
+    def __init__(self):
+        if args.debug is not True:
+            self.client = mqttClient.Client()
+            self.client.username_pw_set('ionodes', '1jg?8jJ+Ut8,')
+            self.client.on_connect = on_connect
+            self.client.on_message = on_message
+            self.client.connect("localhost", 1883, 60)
+            self.client.loop_start()
+        else:
+            print("Website running in debug mode")
+
+
     @cherrypy.tools.accept(media='text/plain')
     def GET(self):
         if args.debug is not True:
-            global last_message
+            # global last_message
             # input MQTT code here
-            return last_message
+            print(last_message)
+            a = live_data.copy()
+            live_data.clear()
+            return json.dumps(a)
         else:
             a = randint(32, 100)
             b = randint(32, 100)
@@ -82,7 +102,10 @@ class AJAXInterface(object):
 
     def POST(self, **data):
         # output MQTT code here
+        if args.debug is not True:
+            self.client.publish("topic", "payload")
         print("sent a value to controller")
+        print(data)
         return "hello"
 
     def PUT(self, another_string):
@@ -93,27 +116,11 @@ class AJAXInterface(object):
         pass
         # cherrypy.session.pop('mystring', None)
 
-class MQTTrunner(cherrypy.Tool):
-    pass
-
 
 if __name__ == '__main__':
     webapp = ThePlant()
-    if args.debug is not True:
-        client = mqtt.Client()
-        client.username_pw_set('ionodes', '1jg?8jJ+Ut8,')
-        client.on_connect = on_connect
-        client.on_message = on_message
-        client.connect("localhost", 1883, 60)
-        client.loop_start()
-    else:
-        print("Website running in debug mode")
     webapp.generator = AJAXInterface()
     cherrypy.engine.autoreload.unsubscribe()
     cherrypy.server.socket_host = '0.0.0.0'
     cherrypy.quickstart(webapp, '/', conf)
-
-    # def post_behavior():
-    #     client.publish("io/IOC1/XV1", "ON")
-    #     print("POST wraps this function")
 

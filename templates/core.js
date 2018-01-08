@@ -50,11 +50,9 @@ $("button").click(function(e) {
         url: "/generator",
         data: {
             id: $(this).attr("id"), // < note use of 'this' here
-            time: "right now"
+            time: Date.now()
         },
-        <!--success: function(result) {-->
-            <!--alert('ok');-->
-        <!--},-->
+        success: function(result) {alert('ok');},
         error: function(result) {
             alert('error');
         }
