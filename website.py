@@ -1,10 +1,44 @@
-import os, os.path
+import os
 import sys
-from opcua import Client
 import cherrypy
-from cherrypy.process.plugins import Autoreloader
-import random
+import argparse
+import json
+from random import randint
+import paho.mqtt.client as mqttClient
+
+if os.name == 'nt':
+    fd = '\\'
+else:
+    fd = '/'
+
+parser = argparse.ArgumentParser(description='Serve a GUI for this control system')
+parser.add_argument('-debug', metavar='debug=True/False', type=bool,
+                    help='Used to debug the website without running i/o')
+args = parser.parse_args()
+
+# cwd = os.path.abspath(os.getcwd()) + fd
+cwd = os.path.dirname(os.path.realpath(__file__)) + fd
+last_message = '0'
+live_data = {}
+
 sys.path.insert(0, "..")
+
+# The callback for when the client receives a CONNACK response from the server.
+def on_connect(client, userdata, flags, rc):
+    print("Connected with result code "+str(rc))
+    # Subscribing in on_connect() means that if we lose the connection and
+    # reconnect then subscriptions will be renewed.
+    client.subscribe("test")
+
+
+# The callback for when a PUBLISH message is received from the server.
+def on_message(client, userdata, msg):
+    # global last_message, live_data
+    # last_message = msg.payload.decode()
+    global live_data
+    live_data[msg.topic] = msg.payload.decode()
+    print(msg.topic+" "+msg.payload.decode())
+
 
 conf = {
     '/': {
@@ -22,51 +56,56 @@ conf = {
     },
     '/favicon.ico': {
             "tools.staticfile.on": True,
-            "tools.staticfile.filename": "C:\\Users\\cburge\\PycharmProjects\\Distillery\\templates\\golden.ico"
-    },
-    '/style.css': {
-            "tools.staticfile.on": True,
-            "tools.staticfile.filename": "C:\\Users\\cburge\\PycharmProjects\\Distillery\\templates\\style.css"
+            "tools.staticfile.filename": cwd + "templates" + fd + "golden.ico"
     },
     '/assets/canvasjs': {
         "tools.staticfile.on": True,
         "tools.staticfile.filename":
-            "C:\\Users\\cburge\\PycharmProjects\\Distillery\\templates\\assets\\canvasjs-1.9.8\\canvasjs.min.js"
+            cwd + "templates" + fd + "assets" + fd + "canvasjs-1.9.8" + fd + "canvasjs.min.js"
     }
-
 }
 
 
 class ThePlant(object):
     @cherrypy.expose
     def index(self):
-        return open('templates\\index.html')
-
-
+        return open(cwd + "templates" + fd + "index.html")
 
 @cherrypy.expose
-class OPCInterface(object):
+class AJAXInterface(object):
+
+    def __init__(self):
+        if args.debug is not True:
+            self.client = mqttClient.Client()
+            self.client.username_pw_set('ionodes', '1jg?8jJ+Ut8,')
+            self.client.on_connect = on_connect
+            self.client.on_message = on_message
+            self.client.connect("localhost", 1883, 60)
+            self.client.loop_start()
+        else:
+            print("Website running in debug mode")
+
 
     @cherrypy.tools.accept(media='text/plain')
     def GET(self):
-        opc_addr = ["0:Objects", "2:Temperature_Sensor", "2:analog_input"]
-        try:
-            return str(root.get_child(opc_addr).get_data_value().Value.Value)
-        except:
-            return 'Unknown server error'
-        # if PV is not None:
-        #     cv = PV.get_data_value().Value.Value
-        #     print("myvar is: ", cv)
-        #     return str(cv)
-        # else:
-        #     return 'Unknown server error'
+        if args.debug is not True:
+            # global last_message
+            # input MQTT code here
+            print(last_message)
+            a = live_data.copy()
+            live_data.clear()
+            return json.dumps(a)
+        else:
+            a = randint(32, 100)
+            b = randint(32, 100)
+            return json.dumps({'var1': a, 'var2': b})
 
     def POST(self, **data):
-        opc_addr = ["0:Objects", "2:Heater", "2:discrete_output"]
-        var = root.get_child(opc_addr)
-        current_value = var.get_data_value().Value.Value
-        root.get_child(opc_addr).set_value(not current_value, var.get_data_type_as_variant_type())
-        print(var.get_data_value().Value.Value)
+        # output MQTT code here
+        if args.debug is not True:
+            self.client.publish("topic", "payload")
+        print("sent a value to controller")
+        print(data)
         return "hello"
 
     def PUT(self, another_string):
@@ -79,18 +118,9 @@ class OPCInterface(object):
 
 
 if __name__ == '__main__':
-    client = Client("opc.tcp://localhost:4840/freeopcua/server/")
     webapp = ThePlant()
-    webapp.generator = OPCInterface()
-    try:
-        client.connect()
-        root = client.get_root_node()
-        objects = client.get_objects_node()
-        # PV = root.get_child(["0:Objects", "2:MyObject", "2:MyVariable"])
-    except ConnectionRefusedError:
-        print('OPC server appears to be down')
+    webapp.generator = AJAXInterface()
     cherrypy.engine.autoreload.unsubscribe()
     cherrypy.server.socket_host = '0.0.0.0'
     cherrypy.quickstart(webapp, '/', conf)
-    # finally:
-    #     client.disconnect()
+
