@@ -8,7 +8,6 @@
             jQuery.each(values, function(i, val) {
             document.getElementById(i).innerHTML = val;
             });
-            //value = parseFloat(string);
           });
         }, updateInterval);
       });
@@ -49,12 +48,14 @@ $("button").click(function(e) {
         type: "POST",
         url: "/generator",
         data: {
-            id: $(this).attr("id"), // < note use of 'this' here
-            time: Date.now()
-        },
-        success: function(result) {alert('ok');},
+            id: $(this).closest("div").attr("id"), // < note use of 'this' here
+            time: Date.now(),
+            value: $(this).attr("value")
+        } /*,
+        success: function(result) {alert(result);},
         error: function(result) {
-            alert('error');
+            alert(result);
         }
+        */
     });
 });

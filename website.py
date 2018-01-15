@@ -20,6 +20,7 @@ args = parser.parse_args()
 cwd = os.path.dirname(os.path.realpath(__file__)) + fd
 last_message = '0'
 live_data = {}
+io_topic_prefix = 'io/IOC/'
 
 sys.path.insert(0, "..")
 
@@ -103,10 +104,9 @@ class AJAXInterface(object):
     def POST(self, **data):
         # output MQTT code here
         if args.debug is not True:
-            self.client.publish("topic", "payload")
-        print("sent a value to controller")
+            self.client.publish(io_topic_prefix + data['id'], data['value'])
         print(data)
-        return "hello"
+        return "wayd"
 
     def PUT(self, another_string):
         pass

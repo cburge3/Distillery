@@ -1,17 +1,8 @@
 from time import strftime, localtime, sleep
 from os import fsync
-from getserialdata import monitorlink
-from opcua import Client
+import paho.mqtt.client as mqttClient
 
 history_interval = 10
-
-def truncate(f, n):
-    # Truncates/pads a float f to n decimal places without rounding
-    s = '{}'.format(f)
-    if 'e' in s or 'E' in s:
-        return '{0:.{1}f}'.format(f, n)
-    i, p, d = s.partition('.')
-    return '.'.join([i, (d+'0'*n)[:n]])
 
 def ctof(c):
     return float(c) * 9 / 5 + 32
