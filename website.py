@@ -82,6 +82,7 @@ class AJAXInterface(object):
             self.client.on_connect = on_connect
             self.client.on_message = on_message
             self.client.connect("localhost", 1883, 60)
+            print("Connecting engine to MQTT server...")
             self.client.loop_start()
         else:
             print("Website running in debug mode")
@@ -103,9 +104,9 @@ class AJAXInterface(object):
 
     def POST(self, **data):
         # output MQTT code here
+        print(data)
         if args.debug is not True:
             self.client.publish(io_topic_prefix + data['id'], data['value'])
-        print(data)
         return "wayd"
 
     def PUT(self, another_string):
