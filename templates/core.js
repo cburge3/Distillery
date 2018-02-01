@@ -13,8 +13,13 @@
       });
 
 	window.onload = function () {
-      var dps = [{}];   //dataPoints.
-      var chart = new CanvasJS.Chart("chartContainer",{
+	    $("h2").each(function(index, error) {
+	        console.log(index+' '+ error);
+	        //alert($(this).text());
+            $(this).text($(this).closest("div").attr("id"));
+        });
+        var dps = [{}];   //dataPoints.
+        var chart = new CanvasJS.Chart("chartContainer",{
       	title :{
       		text: "Distillation Temp"
       	},

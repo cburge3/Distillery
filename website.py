@@ -18,9 +18,10 @@ args = parser.parse_args()
 
 # cwd = os.path.abspath(os.getcwd()) + fd
 cwd = os.path.dirname(os.path.realpath(__file__)) + fd
-last_message = '0'
+
 live_data = {}
-io_topic_prefix = 'io/IOC/'
+io_topic_prefix = 'io/IOC1/out/'
+io_subscription = 'io/IOC1/in/#'
 
 sys.path.insert(0, "..")
 
@@ -29,15 +30,15 @@ def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
     # Subscribing in on_connect() means that if we lose the connection and
     # reconnect then subscriptions will be renewed.
-    client.subscribe("test")
+    client.subscribe(io_subscription)
 
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
-    # global last_message, live_data
-    # last_message = msg.payload.decode()
     global live_data
-    live_data[msg.topic] = msg.payload.decode()
+    # assume that unique tag is last in the MQTT topic structure
+    topic = msg.topic.split('/')[-1]
+    live_data[topic] = msg.payload.decode()
     print(msg.topic+" "+msg.payload.decode())
 
 
@@ -91,19 +92,16 @@ class AJAXInterface(object):
     @cherrypy.tools.accept(media='text/plain')
     def GET(self):
         if args.debug is not True:
-            # global last_message
-            # input MQTT code here
-            print(last_message)
+            global live_data
             a = live_data.copy()
             live_data.clear()
             return json.dumps(a)
         else:
             a = randint(32, 100)
             b = randint(32, 100)
-            return json.dumps({'var1': a, 'var2': b})
+            return json.dumps({'TI100': a, 'TI101': b})
 
     def POST(self, **data):
-        # output MQTT code here
         print(data)
         if args.debug is not True:
             self.client.publish(io_topic_prefix + data['id'], data['value'])

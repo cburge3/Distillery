@@ -22,17 +22,16 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <Streaming.h>
-#include <string.h>
+
+// Communication settings
 
 const char* ssid = "SlauterWireless2G";
 const char* password = "falconpunch";
-
 const char* mqtt_server = "192.168.1.9";
 const char* mqtt_username = "ionodes";
 const char* mqtt_password = "1jg?8jJ+Ut8,";
-const char* temp_topic = "TI143";
-const char* my_topic = "io/IOC/";
-const char* subscription = "io/IOC/#";
+const char* temp_topic = "io/IOC1/in/TI100";
+const char* subscription = "io/IOC1/out/#";
 const char* delim = "/";
 
 // IO Declarations
@@ -43,18 +42,22 @@ const uint8_t EV102 = D3;
 const uint8_t ONE_WIRE_BUS = D4;
 const uint8_t EY100 = D5;
 
+// Other global setup
+
 WiFiClient espClient;
 PubSubClient client(espClient);
 
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature DS18B20(&oneWire);
-int valve = 1;
 char temperatureString[6];
+
+unsigned long previousMillis = 0;
+unsigned long inputScanRate = 10000;
 
 void callback(char* topic, byte* payload, unsigned int length) {
   char asciiPayload[length];
   for (int i = 0; i < length; i++) {
-    Serial.print((char)payload[i]);
+    //Serial.print((char)payload[i]);
     asciiPayload[i] = (char)payload[i];
   }
   Serial.println();
@@ -63,16 +66,17 @@ void callback(char* topic, byte* payload, unsigned int length) {
   char* address;
   bool output;
   output = payloadNumeric;
+  //IO is inverted in the ESP8266
   output = !output;
   address = strtok(topic, delim);
-  //the target IO should be the 0,1,2nd piece of the topic
-  for (int i = 0; i < 2; i++){
+  //the target IO should be the 0,1,2nd,3rd piece of the topic
+  for (int i = 0; i < 3; i++){
     address = strtok(NULL, delim);
   }
   Serial.print("Writing to ");
   Serial.print(address);
   Serial.print(" with a value of ");
-  Serial.print(output);
+  Serial.print(!output);
   
   if (strcmp(address, "EV100") == 0){
     digitalWrite(EV100, output);
@@ -165,14 +169,17 @@ void loop() {
     reconnect();
   }
   client.loop();
-  float temperature = getTemperature();
-  if (temperature != 85.0 || temperature != -127.00) {
-    // convert temperature to a string with two digits before the comma and 2 digits for precision
-    dtostrf(temperature, 2, 2, temperatureString);
-    // send temperature to the serial console
-    Serial << "Sending temperature: " << temperatureString << endl;
-    // send temperature to the MQTT topic
-    client.publish(temp_topic, temperatureString);
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis > inputScanRate) {
+    float temperature = getTemperature();
+    if (temperature != 85.0 || temperature != -127.00) {
+      // convert temperature to a string with two digits before the comma and 2 digits for precision
+      dtostrf(temperature, 2, 2, temperatureString);
+      // send temperature to the serial console
+      Serial << "Sending temperature: " << temperatureString << endl;
+      // send temperature to the MQTT topic
+      client.publish(temp_topic, temperatureString);
+      previousMillis = currentMillis;
+    }
   }
-  delay(5000);
 }

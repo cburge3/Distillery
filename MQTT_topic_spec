@@ -1,7 +1,7 @@
 For IO nodes:
 io/IOCx/#
-io/IOC/TTxxx
-io/IOC/EVxxx
+io/IOC1/in/TTxxx
+io/IOC1/out/EVxxx
 
 For command line subscription testing:
 mosquitto_sub -u "ionodes" -P "1jg?8jJ+Ut8," -t "io/IOC1/#"
