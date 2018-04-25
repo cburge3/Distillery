@@ -3,8 +3,6 @@
 
 /*
  Sketch which publishes temperature data from a DS1820 sensor to a MQTT topic.
- This sketch goes in deep sleep mode once the temperature has been sent to the MQTT
- topic and wakes up periodically (configure SLEEP_DELAY_IN_SECONDS accordingly).
  Hookup guide:
  - connect D0 pin to RST pin in order to enable the ESP8266 to wake up periodically
  - DS18B20:
@@ -25,9 +23,10 @@
 
 // Communication settings
 
-const char* ssid = "SlauterWireless2G";
-const char* password = "falconpunch";
-const char* mqtt_server = "192.168.1.9";
+// check Setup_Wifi() for this node's local IP
+const char* ssid = "Hammerhouse";
+const char* password = "macyschrade";
+const char* mqtt_server = "10.0.112.177";
 const char* mqtt_username = "ionodes";
 const char* mqtt_password = "1jg?8jJ+Ut8,";
 const char* temp_topic = "io/IOC1/in/TI100";
@@ -121,9 +120,9 @@ void setup_wifi() {
   Serial.println();
   Serial.print("Connecting to ");
   Serial.println(ssid);
-  IPAddress ip(192, 168, 1, 43); // where xx is the desired IP Address
-  IPAddress gateway(192, 168, 1, 1); // set gateway to match your network
-  IPAddress subnet(255, 255, 255, 0); // set subnet mask to match your network
+  IPAddress ip(10, 0, 112, 117); // where xx is the desired IP Address
+  IPAddress gateway(10, 0, 0, 1); // set gateway to match your network
+  IPAddress subnet(255, 255, 0, 0); // set subnet mask to match your network
   WiFi.begin(ssid, password);
   WiFi.config(ip, gateway, subnet);
 

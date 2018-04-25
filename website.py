@@ -16,7 +16,6 @@ parser.add_argument('-debug', metavar='debug=True/False', type=bool,
                     help='Used to debug the website without running i/o')
 args = parser.parse_args()
 
-# cwd = os.path.abspath(os.getcwd()) + fd
 cwd = os.path.dirname(os.path.realpath(__file__)) + fd
 
 live_data = {}
@@ -44,8 +43,8 @@ def on_message(client, userdata, msg):
 
 conf = {
     '/': {
-        'tools.sessions.on': True,
-        'tools.staticdir.root': os.path.abspath(os.getcwd())
+        'tools.sessions.on': True
+        # 'tools.staticdir.root': os.path.abspath(os.getcwd())
     },
     '/generator': {
         'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
@@ -54,16 +53,11 @@ conf = {
     },
     '/static': {
         'tools.staticdir.on': True,
-        'tools.staticdir.dir': './templates'
+        'tools.staticdir.dir': cwd + "templates"
     },
     '/favicon.ico': {
             "tools.staticfile.on": True,
             "tools.staticfile.filename": cwd + "templates" + fd + "golden.ico"
-    },
-    '/assets/canvasjs': {
-        "tools.staticfile.on": True,
-        "tools.staticfile.filename":
-            cwd + "templates" + fd + "assets" + fd + "canvasjs-1.9.8" + fd + "canvasjs.min.js"
     }
 }
 
