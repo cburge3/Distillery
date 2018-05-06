@@ -40,7 +40,6 @@ def on_message(client, userdata, msg):
     live_data[topic] = msg.payload.decode()
     print(msg.topic+" "+msg.payload.decode())
 
-
 conf = {
     '/': {
         'tools.sessions.on': True

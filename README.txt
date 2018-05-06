@@ -1,5 +1,5 @@
+Start website
 Start controller
-Start interface
 Start historian
 
 Point browser at HMI via IP address - port 8080

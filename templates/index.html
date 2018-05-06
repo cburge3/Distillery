@@ -1,17 +1,24 @@
 <!DOCTYPE html>
-<html>
+<html lang="en-US">
   <head>
       <title>Chippedhammer</title>
       <link href="static/style.css" rel="stylesheet" type="text/css">
   </head>
   <body>
-        <label id="TI100" style="font-size:120px">Nothing Doing</label>
+  <table>
+  <tr><td style="width: 20%">
+    <div id="liveText">
+        <label id="TI100" style="font-size:120px"></label>
         <label style="font-size:120px">&#176F</label><br>
-        <label id="TI101" style="font-size:120px">Nothing Doing</label>
+        <label id="TI101" style="font-size:120px"></label>
         <label style="font-size:120px">&#176F</label>
-    <br>
-    <svg width="960" height="500"></svg>
-    <br>
+    </div></td>
+  <td style="width: 80%">
+    <div id="chartContainer">
+    <div id="timeSeriesChart"></div>
+    </div>
+  </td>
+  </tr><tr><td>
         <div id="EV100" class="COValve">
             <h2>This tag</h2>
             <button type="button" onclick="" value="1" class="">Open</button>
@@ -31,8 +38,12 @@
             <h2>This tag</h2>
             <button type="button" onclick="" value="1" class="">On</button>
             <button type="button" onclick="" value="0">Off</button>
-        </div><br>
+        </div>
+  </td></tr></table>
+    </div>
+        <link href="static/c3-0.5.4/c3.css" rel="stylesheet">
         <script src="//d3js.org/d3.v4.min.js"></script>
+        <script src="static/c3-0.5.4/c3.min.js"></script>
         <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
         <script type="text/javascript" src="static/core.js"></script>
   </body>

@@ -25,13 +25,33 @@ $("button").click(function(e) {
 });
 
 var v1 = ['TI100'],
-v2 = ['TI101']
-var datapoints = [v1, v2];
+v2 = ['TI101'],
+x = ['x']
+var datapoints = [x, v1, v2];
 
 var chart = c3.generate({
-    bindto: '#chart',
+    bindto: '#timeSeriesChart',
+
     data: {
+      x: 'x',
       columns: datapoints
+    },
+    axis: {
+        x: {
+            type: 'timeseries',
+            tick: {
+                format: '%H:%M:%S'
+            }
+        }
+    },
+    options: {
+        animation: {
+            duration: 0, // general animation time
+        },
+        hover: {
+            animationDuration: 0, // duration of animations when hovering an item
+        },
+        responsiveAnimationDuration: 0, // animation duration after a resize
     }
 });
 /* Periodically refresh incoming data */
@@ -47,9 +67,11 @@ var chart = c3.generate({
                     datapoints[j].push(val);
                 }
             }
+            });
+            t = new Date();
+            datapoints[0].push(t);
             chart.load({
                 columns: datapoints
-                });
             });
           });
         }, updateInterval);
