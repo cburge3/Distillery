@@ -5,46 +5,55 @@
       <link href="static/style.css" rel="stylesheet" type="text/css">
   </head>
   <body>
-  <table>
-  <tr><td style="width: 20%">
-    <div id="liveText">
-        <label id="TI100" style="font-size:120px"></label>
-        <label style="font-size:120px">&#176F</label><br>
-        <label id="TI101" style="font-size:120px"></label>
-        <label style="font-size:120px">&#176F</label>
-    </div></td>
-  <td style="width: 80%">
+  <div id="liveData">
+  <div id="liveText">
+        <label id="TI100"></label>
+        <label>&#176F</label><br>
+        <label id="TI101"></label>
+        <label>&#176F</label>
+  </div>
     <div id="chartContainer">
-    <div id="timeSeriesChart"></div>
+        <div id="timeSeriesChart"></div>
     </div>
-  </td>
-  </tr><tr><td>
-        <div id="EV100" class="COValve">
+  </div>
+  <div id="valveControls">
+        <div id="EV100" class="OutputCommand">
             <h2>This tag</h2>
             <button type="button" onclick="" value="1" class="">Open</button>
             <button type="button" onclick="" value="0">Close</button>
         </div><br>
-        <div id="EV101" class="COValve">
+        <div id="EV101" class="OutputCommand">
             <h2>This tag</h2>
             <button type="button" onclick="" value="1" class="">Open</button>
             <button type="button" onclick="" value="0">Close</button>
         </div><br>
-        <div id="EV102" class="COValve">
+        <div id="EV102" class="OutputCommand">
             <h2>This tag</h2>
             <button type="button" onclick="" value="1" class="">Open</button>
             <button type="button" onclick="" value="0">Close</button>
         </div><br>
-        <div id="EY100" class="">
+        <div id="EY100" class="OutputCommand">
             <h2>This tag</h2>
             <button type="button" onclick="" value="1" class="">On</button>
             <button type="button" onclick="" value="0">Off</button>
         </div>
-  </td></tr></table>
-    </div>
-        <link href="static/c3-0.5.4/c3.css" rel="stylesheet">
-        <script src="//d3js.org/d3.v4.min.js"></script>
-        <script src="static/c3-0.5.4/c3.min.js"></script>
-        <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
-        <script type="text/javascript" src="static/core.js"></script>
+
+  </div>
+  <div id="Run1" class="ProgramControls">
+            <h2>This tag</h2>
+            <button type="button" onclick="" value="1" class="">Start</button>
+            <button type="button" onclick="" value="0">Stop</button>
+  </div>
+  <div>
+      <div class="Setpoint Label">SP 1</div><input class="SP">
+      <div class="Setpoint Label">SP 2</div><input class="SP">
+      <div class="Setpoint Label">SP 3</div><input class="SP">
+      <div class="Setpoint Label">SP 4</div><input class="SP">
+  </div>
+  <link href="static/c3-0.5.4/c3.css" rel="stylesheet">
+  <script src="//d3js.org/d3.v4.min.js"></script>
+  <script src="static/c3-0.5.4/c3.min.js"></script>
+  <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+  <script type="text/javascript" src="static/core.js"></script>
   </body>
 </html>

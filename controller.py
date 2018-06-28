@@ -1,5 +1,6 @@
 import paho.mqtt.client as mqtt
 from utilities import ctof
+import time
 
 mqtt_hub_ip = '192.168.1.9'
 prefix = 'io/IOC1/out/'
@@ -16,10 +17,10 @@ def tempchange(client, userdata, message):
     temperature = float(message.payload.decode())
     # temperature = ctof(temperature)
     print(temperature)
-    client.publish(outputs['valve1'], int(setpoints[0] <= temperature < setpoints[1]))
-    client.publish(outputs['valve2'], int(setpoints[1] <= temperature < setpoints[2]))
-    client.publish(outputs['valve3'], int(setpoints[2] <= temperature < setpoints[3]))
-    client.publish(outputs['heating_element'], int(setpoints[3] <= temperature < setpoints[4]))
+    write(client, outputs['valve1'], int(setpoints[0] <= temperature < setpoints[1]))
+    write(client, outputs['valve2'], int(setpoints[1] <= temperature < setpoints[2]))
+    write(client, outputs['valve3'], int(setpoints[2] <= temperature < setpoints[3]))
+    write(client, outputs['heating_element'], int(setpoints[3] <= temperature < setpoints[4]))
     print(temperature < setpoints[3])
     # client.publish(outputs['heating_element'], int(temperature < setpoints[3]))
 
@@ -31,6 +32,9 @@ def on_connect(client, userdata, flags, rc):
     # reconnect then subscriptions will be renewed.
     client.subscribe(inputs['temp'])
     client.message_callback_add(inputs['temp'], tempchange)
+
+def write(client, address, value):
+    client.publish(address, value)
 
 
 if __name__ == '__main__':

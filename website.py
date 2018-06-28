@@ -5,6 +5,7 @@ import argparse
 import json
 from random import randint
 import paho.mqtt.client as mqttClient
+import subprocess
 
 if os.name == 'nt':
     fd = '\\'
@@ -21,6 +22,7 @@ cwd = os.path.dirname(os.path.realpath(__file__)) + fd
 live_data = {}
 io_topic_prefix = 'io/IOC1/out/'
 io_subscription = 'io/IOC1/in/#'
+commands = ['OutputCommand','ProgramControls']
 
 sys.path.insert(0, "..")
 
@@ -94,13 +96,26 @@ class AJAXInterface(object):
             b = randint(32, 100)
             return json.dumps({'TI100': a, 'TI101': b})
 
-    def POST(self, **data):
+    def PUT(self, **data):
         print(data)
-        if args.debug is not True:
-            self.client.publish(io_topic_prefix + data['id'], data['value'])
+        # handle different types of requests
+        command = data['class']
+        print(data['class'], command)
+        if command == commands[0]:
+            if args.debug is not True:
+                self.client.publish(io_topic_prefix + data['id'], data['value'])
+            else:
+                pass
+        if command == commands[1]:
+            if int(data['value']) == 1:
+                print("I'm starting the program!")
+            else:
+                print("I'm stopping the program :(")
+            pass
+            # start the program here
         return "wayd"
 
-    def PUT(self, another_string):
+    def POST(self, another_string):
         pass
         # cherrypy.session['mystring'] = another_string
 

@@ -1,6 +1,6 @@
 var values;
 var xVal = 0;
-var updateInterval = 2000;
+var updateInterval = 10000;
 
 /* Populate dynamic text for all of the devices */
 	window.onload = function () {
@@ -14,12 +14,13 @@ var updateInterval = 2000;
 $("button").click(function(e) {
     e.preventDefault();
     $.ajax({
-        type: "POST",
+        type: "PUT",
         url: "/generator",
         data: {
-            id: $(this).closest("div").attr("id"), // < note use of 'this' here
+            path: $(this).closest("div").attr("id"),
             time: Date.now(),
-            value: $(this).attr("value")
+            value: $(this).attr("value"),
+            class: $(this).closest("div").attr("class")
         }
     });
 });
@@ -29,31 +30,31 @@ v2 = ['TI101'],
 x = ['x']
 var datapoints = [x, v1, v2];
 
-var chart = c3.generate({
-    bindto: '#timeSeriesChart',
-
-    data: {
-      x: 'x',
-      columns: datapoints
-    },
-    axis: {
-        x: {
-            type: 'timeseries',
-            tick: {
-                format: '%H:%M:%S'
-            }
-        }
-    },
-    options: {
-        animation: {
-            duration: 0, // general animation time
-        },
-        hover: {
-            animationDuration: 0, // duration of animations when hovering an item
-        },
-        responsiveAnimationDuration: 0, // animation duration after a resize
-    }
-});
+//var chart = c3.generate({
+//    bindto: '#timeSeriesChart',
+//
+//    data: {
+//      x: 'x',
+//      columns: datapoints
+//    },
+//    axis: {
+//        x: {
+//            type: 'timeseries',
+//            tick: {
+//                format: '%H:%M:%S'
+//            }
+//        }
+//    },
+//    options: {
+//        animation: {
+//            duration: 0, // general animation time
+//        },
+//        hover: {
+//            animationDuration: 0, // duration of animations when hovering an item
+//        },
+//        responsiveAnimationDuration: 0, // animation duration after a resize
+//    }
+//});
 /* Periodically refresh incoming data */
       $(document).ready(function() {
         window.setInterval(function(){
@@ -70,9 +71,9 @@ var chart = c3.generate({
             });
             t = new Date();
             datapoints[0].push(t);
-            chart.load({
-                columns: datapoints
-            });
+//            chart.load({
+//                columns: datapoints
+//            });
           });
         }, updateInterval);
       });

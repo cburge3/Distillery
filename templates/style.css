@@ -1,3 +1,16 @@
 p {
     font-size: 300%;
 }
+#liveText{
+    font-size: 75px;
+    width: 15%;
+    float: left;
+}
+#chartContainer{
+    flex-grow: 1;
+}
+#valveControls{}
+#liveData{
+    height:350px;
+    display:flex;
+    }
