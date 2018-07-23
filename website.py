@@ -5,23 +5,35 @@ import argparse
 import json
 from random import randint
 import paho.mqtt.client as mqttClient
+import csv
 import subprocess
 
+# multi os support
 if os.name == 'nt':
     fd = '\\'
 else:
     fd = '/'
 
+# command line parsing
 parser = argparse.ArgumentParser(description='Serve a GUI for this control system')
 parser.add_argument('-debug', metavar='debug=True/False', type=bool,
-                    help='Used to debug the website without running i/o')
+                    help='Used to debug the website without running i/o interfacing backend')
 args = parser.parse_args()
 
 cwd = os.path.dirname(os.path.realpath(__file__)) + fd
 
+# Build copy of IO list in memory
+io_list = []
+with open('IO.txt') as io_file:
+    for z in csv.DictReader(io_file):
+        io_list.append(z)
+
 live_data = {}
-io_topic_prefix = 'io/IOC1/out/'
-io_subscription = 'io/IOC1/in/#'
+# this needs to be looked up by IO card
+# io_topic_prefix = 'io/IOC1/out/'
+io_output_statics = ['io/','/out/']
+# receive data from all io cards
+io_subscription = 'io/#'
 commands = ['OutputCommand','ProgramControls']
 
 sys.path.insert(0, "..")
@@ -72,6 +84,7 @@ class ThePlant(object):
 class AJAXInterface(object):
 
     def __init__(self):
+        self.processes = []
         if args.debug is not True:
             self.client = mqttClient.Client()
             self.client.username_pw_set('ionodes', '1jg?8jJ+Ut8,')
@@ -101,16 +114,27 @@ class AJAXInterface(object):
         # handle different types of requests
         command = data['class']
         print(data['class'], command)
+        # write to IO
         if command == commands[0]:
-            if args.debug is not True:
-                self.client.publish(io_topic_prefix + data['id'], data['value'])
-            else:
-                pass
+            for entries in io_list:
+                if data['id'] == entries['IOtag']:
+                    topicPath = io_output_statics[0] + entries['Card'] + io_output_statics[1] + data['id']
+                    if args.debug is not True:
+                        self.client.publish(io_output_statics[0] + entries['Card'] + io_output_statics[1] + data['id'],
+                                            data['value'])
+                    print("writing {} to {}".format(topicPath, data['value']))
+        # write to non online value
         if command == commands[1]:
+            ctrl_prog = subprocess.Popen
             if int(data['value']) == 1:
                 print("I'm starting the program!")
+                z = subprocess.Popen("python controller.py")
+                self.processes.append(z)
+                print(z.stdout,z.returncode)
             else:
                 print("I'm stopping the program :(")
+                self.processes[0].kill()
+                self.processes.pop()
             pass
             # start the program here
         return "wayd"

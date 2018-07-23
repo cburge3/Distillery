@@ -1,0 +1,8 @@
+IOtag,Card,Direction,Pin,description
+EV100,IOC1,out,D1,none
+EV101,IOC1,out,D2,none
+EV102,IOC1,out,D3,none
+TI100,IOC1,in,D6,none
+EY100,IOC1,out,D5,none
+EY101,IOC2,out,D1,none
+TI101,IOC2,in,D6,none

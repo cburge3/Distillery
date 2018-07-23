@@ -3,5 +3,11 @@ io/IOCx/#
 io/IOC1/in/TTxxx
 io/IOC1/out/EVxxx
 
+Local to a control alorithm:
+"ctrl/" + self.ID + "/#"
+
 For command line subscription testing:
 mosquitto_sub -u "ionodes" -P "1jg?8jJ+Ut8," -t "io/IOC1/#"
+
+All clients must have unique ID string when they connect to the broker:
+https://stackoverflow.com/questions/27174271/what-is-the-clientid-needed-for
