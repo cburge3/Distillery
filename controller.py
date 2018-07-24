@@ -5,7 +5,25 @@ from time import sleep
 import socket
 
 
-class ControlExecution(Thread):
+class EndableThread(Thread):
+    def __init__(self, *args, **kwargs):
+        Thread.__init__(self, *args, **kwargs)
+        self.event = Event()
+
+    def run(self):
+        print("Running")
+        while not self.event.is_set():
+            self._target()
+        print("Stopped")
+        self.event.clear()
+        Thread.__init__(self)
+
+    def stop(self):
+        self.event.set()
+        print("Stopping")
+
+
+class ControlExecution(EndableThread):
     def __init__(self, function, scan_time):
         Thread.__init__(self)
         self.function = function
@@ -25,20 +43,16 @@ class ControlExecution(Thread):
         self.event.clear()
         Thread.__init__(self)
 
-    def stop(self):
-        self.event.set()
-        print("Stopping")
-
 
 class ControlAlgorithm:
-    def __init__(self, name, outputs, inputs, parameters, control_function, scan_time=10, testing=False):
+    def __init__(self, name, outputs, inputs, parameters, control_function, scan_time=1, testing=False):
 
         self.outputs = outputs
         self.inputs = inputs
         self.control_function = control_function
         self.ID = name
         self.scan_time = scan_time
-        self.input_timeout_tries = 3
+        self.input_timeout_tries = 1
         # copy keys from parameter list to build a full path to subscribe to changes
         self.parameter_values = parameters
         self.parameter_paths = parameters.fromkeys(parameters, "")
@@ -52,18 +66,14 @@ class ControlAlgorithm:
             self.client.connect(mqtt_broker_ip, 1883, 60)
             self.client.loop_forever()
         else:
-            self.dummy_client = Thread(target=self.listen_for_messages)
+            self.dummy_client = EndableThread(target=self.listen_for_messages)
             self.dummy_client.start()
         self.input_buffer = {}
         self.execution = True
         # write initial parameter values to data broker
         for m in parameters:
             self.write(self.parameter_paths[m], self.parameter_values[m])
-        # self.output_function = None
-        # self.inputs = None
-        # self.parameters = None
-        # self.outputs = None
-        self.main_program = ControlExecution(self.control_function, 30)
+        self.main_program = ControlExecution(self.control_function, self.scan_time)
         self.main_program.output_function = self.write
         self.main_program.inputs = self.input_buffer
         self.main_program.parameters = self.parameter_values
@@ -105,16 +115,20 @@ class ControlAlgorithm:
 
     def listen_for_messages(self):
         serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        serversocket.settimeout(self.scan_time)
         serversocket.bind(('localhost', 9000))
-        serversocket.listen(5)  # become a server socket, maximum 5 connections
-
-        while True:
+        try:
+            serversocket.listen(5)  # become a server socket, maximum 5 connections
             connection, address = serversocket.accept()
             buf = connection.recv(64)
+        except socket.timeout:
+            pass
+        else:
+            # while True:
             if len(buf) > 0:
                 msg = buf.decode().split(",")
                 # io/IOC1/in/TI100
-                # ctrl/StillSequence/SP1
+                # ctrl/any_name/SP1
                 print("test value accepted", msg[0], msg[1])
                 address = msg[0]
                 value = msg[1]
@@ -128,14 +142,26 @@ class ControlAlgorithm:
 
     def execute(self):
         # wait for all of the input buffer to have populated before executing the program
-        print(self.input_buffer, self.inputs)
         count = 0
         while self.input_buffer.keys() != self.inputs.keys():
             sleep(self.scan_time)
             count += 1
             if count > self.input_timeout_tries:
-                raise TimeoutError("No response from inputs")
+                if self.testing_flag:
+                    # stop concurrent threads
+                    self.dummy_client.stop()
+                raise TimeoutError("No input received in {} seconds".format(self.scan_time * self.input_timeout_tries))
         self.main_program.start()
+
+    def stop(self):
+        if self.main_program.is_alive():
+            self.main_program.stop()
+        if self.dummy_client.is_alive():
+            self.dummy_client.stop()
+
+    def start(self):
+        if not self.main_program.is_alive():
+            self.main_program.start()
 
 
 if __name__ == '__main__':
@@ -158,6 +184,10 @@ if __name__ == '__main__':
         write(outputs['EV102'], int(parameters["SP3"] <= temperature < parameters["SP4"]))
         write(outputs['EY100'], int(parameters["SP1"] <= temperature < parameters["SP5"]))
 
-    c = ControlAlgorithm("StillSequence", out, ins, param, make_cuts, testing=True)
+    c = ControlAlgorithm("StillSequence", out, ins, param, make_cuts, testing=True, scan_time=10)
+    print("nothing else happening")
+    sleep(26)
+    c.stop()
+
 
 
