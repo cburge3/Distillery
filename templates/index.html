@@ -7,52 +7,50 @@
   <body>
   <div id="liveData">
   <div id="liveText">
-        <label id="TI100"></label>
+        <label id="io/IOC1/in/TI100"></label>
         <label>&#176F</label><br>
-        <label id="TI101"></label>
+        <label id="io/IOC2/in/TI101"></label>
         <label>&#176F</label>
   </div>
-    <div id="chartContainer">
-        <div id="timeSeriesChart"></div>
-    </div>
   </div>
+  <a href="static/graph.html">Chart View</a>
   <div id="valveControls">
         <div id="EV100" class="OutputCommand">
             <h2>This tag</h2>
-            <button type="button" onclick="" value="1" class="">Open</button>
-            <button type="button" onclick="" value="0">Close</button>
+            <button id="" type="button" onclick="" value="1" class="write">Open</button>
+            <button type="button" onclick="" value="0" class="write">Close</button>
         </div><br>
         <div id="EV101" class="OutputCommand">
             <h2>This tag</h2>
-            <button type="button" onclick="" value="1" class="">Open</button>
-            <button type="button" onclick="" value="0">Close</button>
+            <button type="button" onclick="" value="1" class="write">Open</button>
+            <button type="button" onclick="" value="0" class="write">Close</button>
         </div><br>
         <div id="EV102" class="OutputCommand">
             <h2>This tag</h2>
-            <button type="button" onclick="" value="1" class="">Open</button>
-            <button type="button" onclick="" value="0">Close</button>
+            <button type="button" onclick="" value="1" class="write">Open</button>
+            <button type="button" onclick="" value="0" class="write">Close</button>
         </div><br>
         <div id="EY100" class="OutputCommand">
             <h2>This tag</h2>
-            <button type="button" onclick="" value="1" class="">On</button>
-            <button type="button" onclick="" value="0">Off</button>
+            <button type="button" onclick="" value="1" class="write">On</button>
+            <button type="button" onclick="" value="0" class="write">Off</button>
         </div>
 
   </div>
-  <div id="Run1" class="ProgramControls">
-            <h2>This tag</h2>
-            <button type="button" onclick="" value="1" class="">Start</button>
-            <button type="button" onclick="" value="0">Stop</button>
+  <br>
+  <div id="ctrl/TK100/" class="algorithm_reference">
+      <div class="Setpoint Label" id="SP1"><label></label>SP 1 <input class="SP_numeric"> <button class="write">S</button> </div>
+      <div class="Setpoint Label" id="SP2"><label></label>SP 2 <input class="SP_numeric"> <button class="write">S</button> </div>
+      <div class="Setpoint Label" id="SP3"><label></label>SP 3 <input class="SP_numeric"> <button class="write">S</button></div>
+      <div class="Setpoint Label" id="SP4"><label></label>SP 4 <input class="SP_numeric"> <button class="write">S</button></div>
+      <div class="Setpoint Label" id="SP5"><label></label>SP 5 <input class="SP_numeric"> <button class="write">S</button></div>
+
+      <div id="Run1" class="ProgramControls">
+          <h2>This tag</h2>
+          <button type="button" class="write" value="1">Start</button>
+          <button type="button" class="write" value="0">Stop</button>
+      </div>
   </div>
-  <div>
-      <div class="Setpoint Label">SP 1</div><input class="SP">
-      <div class="Setpoint Label">SP 2</div><input class="SP">
-      <div class="Setpoint Label">SP 3</div><input class="SP">
-      <div class="Setpoint Label">SP 4</div><input class="SP">
-  </div>
-  <link href="static/c3-0.5.4/c3.css" rel="stylesheet">
-  <script src="//d3js.org/d3.v4.min.js"></script>
-  <script src="static/c3-0.5.4/c3.min.js"></script>
   <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
   <script type="text/javascript" src="static/core.js"></script>
   </body>

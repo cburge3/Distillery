@@ -1,17 +1,38 @@
 var values;
 var xVal = 0;
 var updateInterval = 10000;
+var registered_values = ["TI100","TI101","ctrl/TK100/SP1","ctrl/TK100/SP2","ctrl/TK100/SP3","ctrl/TK100/SP4",
+"ctrl/TK100/SP5"]
 
-/* Populate dynamic text for all of the devices */
-	window.onload = function () {
-	    $("h2").each(function(index, error) {
-	        console.log(index+' '+ error);
-            $(this).text($(this).closest("div").attr("id"));
+window.onload = function () {
+    /* Register all datapoints requiring updates with the server */
+    $.ajax({
+    type: "POST",
+    url: "/generator",
+    data: {
+        time: Date.now(),
+        items: registered_values
+        }
+    });
+    /* Populate dynamic text for all of the devices */
+    $("h2").each(function(index, error) {
+        $(this).text($(this).closest("div").attr("id"));
+    });
+    /* Format input boxes */
+    $(".SP_numeric").attr("maxlength", 5)
+    $(".SP_numeric").attr("size", 5)
+    /* establish full path for algorithm references */
+    $(".algorithm_reference").each(function(){
+        var reference_name = $(this).attr("id");
+        $(this).children("div").each(function(){
+            var parameter_name = $(this).attr("id");
+            $(this).children("label").attr("id", reference_name + parameter_name);
         });
-}
+    });
+};
 
 /* Send click commands to server */
-$("button").click(function(e) {
+$(".write").click(function(e) {
     e.preventDefault();
     $.ajax({
         type: "PUT",
@@ -24,56 +45,33 @@ $("button").click(function(e) {
         }
     });
 });
+/* Prohibit invalid characters in SP field */
+$(".SP_numeric").keyup(function(){
+    var numbers = $(this).val();
+    $(this).val(numbers.replace(/\D/, ''));
+    $(this).parent().children("button").attr("value",$(this).val());
+});
 
 var v1 = ['TI100'],
 v2 = ['TI101'],
 x = ['x']
 var datapoints = [x, v1, v2];
 
-//var chart = c3.generate({
-//    bindto: '#timeSeriesChart',
-//
-//    data: {
-//      x: 'x',
-//      columns: datapoints
-//    },
-//    axis: {
-//        x: {
-//            type: 'timeseries',
-//            tick: {
-//                format: '%H:%M:%S'
-//            }
-//        }
-//    },
-//    options: {
-//        animation: {
-//            duration: 0, // general animation time
-//        },
-//        hover: {
-//            animationDuration: 0, // duration of animations when hovering an item
-//        },
-//        responsiveAnimationDuration: 0, // animation duration after a resize
-//    }
-//});
 /* Periodically refresh incoming data */
       $(document).ready(function() {
         window.setInterval(function(){
           $.get("/generator").done(function(result) {
            values = JSON.parse(result);
             jQuery.each(values, function(i, val) {
-            document.getElementById(i).innerHTML = val;
-            var l = datapoints.length;
-            for (var j = 0; j < l; j++) {
-                if (datapoints[j][0] == i){
-                    datapoints[j].push(val);
-                }
+            try {
+                document.getElementById(i).innerHTML = val;
+            }
+            catch (exc) {
+                //TODO tell server to unregister the extra value
+                console.log(i + " does not exist on this page " + exc);
             }
             });
-            t = new Date();
-            datapoints[0].push(t);
-//            chart.load({
-//                columns: datapoints
-//            });
           });
         }, updateInterval);
       });
+

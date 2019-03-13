@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style> /* set the CSS */
+
+body { font: 12px Arial;}
+
+path {
+  stroke: steelblue;
+  stroke-width: 2;
+  fill: none;
+}
+
+.axis path,
+.axis line {
+	fill: none;
+	stroke: grey;
+	stroke-width: 1;
+	shape-rendering: crispEdges;
+}
+
+select {
+        width:200px;
+}
+
+</style>
+<body>
+    <select id="table_list" width="10%">
+        <option value="None">None</option>
+    </select><br><br>
+    <input ID="update_table" type="submit" value="Submit" onclick="drawGraph();">
+    <div id="chart"></div>
+
+<!-- load libraries -->
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+<script type="text/javascript" src="graph.js"></script>
+</body>

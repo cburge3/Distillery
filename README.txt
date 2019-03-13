@@ -1,4 +1,4 @@
-Start website
+Website is started by root's crontab
 Start controller
 Start historian
 

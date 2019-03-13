@@ -1,6 +1,6 @@
 import csv
 
-mqtt_broker_ip = '192.168.1.9'
+mqtt_broker_ip = '10.0.112.177'
 mqtt_username = 'ionodes'
 mqtt_key = '1jg?8jJ+Ut8,'
 

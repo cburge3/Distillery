@@ -6,3 +6,4 @@ TI100,IOC1,in,D6,none
 EY100,IOC1,out,D5,none
 EY101,IOC2,out,D1,none
 TI101,IOC2,in,D6,none
+LSH103,IOC2,in,D3,none

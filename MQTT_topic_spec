@@ -9,5 +9,6 @@ Local to a control alorithm:
 For command line subscription testing:
 mosquitto_sub -u "ionodes" -P "1jg?8jJ+Ut8," -t "io/IOC1/#"
 
-All clients must have unique ID string when they connect to the broker:
+All clients must have unique ID string when they connect to the broker.  This only seems to affect the
+ESP8266 clients however
 https://stackoverflow.com/questions/27174271/what-is-the-clientid-needed-for
